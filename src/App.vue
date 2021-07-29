@@ -1,9 +1,9 @@
 <template>
-  <NThemeEditor>
-    <NConfigProvider :locale="zhCN" :date-locale="dateZhCN">
-      <GridTable></GridTable>
-    </NConfigProvider>
-  </NThemeEditor>
+  <!-- <NThemeEditor> -->
+  <NConfigProvider :locale="zhCN" :date-locale="dateZhCN">
+    <GridTable></GridTable>
+  </NConfigProvider>
+  <!-- </NThemeEditor> -->
 
 </template>
 
