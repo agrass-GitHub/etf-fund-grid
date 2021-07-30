@@ -1,16 +1,14 @@
 <template>
-  <!-- <NThemeEditor> -->
-  <NConfigProvider :locale="zhCN" :date-locale="dateZhCN">
+  <div class="page">
     <GridTable></GridTable>
-  </NConfigProvider>
-  <!-- </NThemeEditor> -->
-
+  </div>
 </template>
 
 <script setup>
-import { NConfigProvider, zhCN, dateZhCN, NThemeEditor } from "naive-ui";
-import GridTable from "./components/GridTable.vue";
-
-// This starter template is using Vue 3 experimental <script setup> SFCs
-// Check out https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
+import GridTable from "./components/GridTable.jsx";
 </script>
+<style>
+.page {
+  padding: 10px;
+}
+</style>

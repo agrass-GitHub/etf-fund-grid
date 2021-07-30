@@ -10,35 +10,16 @@
         <n-data-table :single-line="false" :columns="columns" :data="tableData" />
       </n-grid-item>
     </n-grid>
-    <n-modal v-model:show="showModal" preset="dialog" title="新增条件单" :show-icon="false" positive-text="提交" style="width:600px">
+
+    <!-- 表单 -->
+    <n-modal v-model:show="showModal" preset="dialog" title="新增条件单" :show-icon="false" positive-text="提交" style="width:1000px"
+      :on-positive-click="formSubmit">
       <n-form :model="formData" ref="formRef" label-placement="left" label-width="70px" style="margin-top:20px">
         <n-grid :cols="24" :x-gap="24" style="width:100%">
-          <n-form-item-gi :span="12" label="品种" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
-          </n-form-item-gi>
-          <n-form-item-gi :span="12" label="代码" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
-          </n-form-item-gi>
-          <n-form-item-gi :span="12" label="挡位" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
-          </n-form-item-gi>
-          <n-form-item-gi :span="12" label="备注" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
-          </n-form-item-gi>
-          <n-form-item-gi :span="12" label="买入价格" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
-          </n-form-item-gi>
-          <n-form-item-gi :span="12" label="买入股数" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
-          </n-form-item-gi>
-          <n-form-item-gi :span="12" label="卖出价格" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
-          </n-form-item-gi>
-          <n-form-item-gi :span="12" label="卖出股数" path="inputValue">
-            <n-input placeholder="Input" v-model:value="formData.inputValue" />
+          <n-form-item-gi v-for="(item,key) in formItems" :key="key" :label="item.label" :path="key" :span="8">
+            <component :is="item.is" v-model:value="formData[key]" v-bind="getComponentProps(item)"></component>
           </n-form-item-gi>
         </n-grid>
-
       </n-form>
     </n-modal>
 
@@ -48,7 +29,6 @@
 <script>
 import {
   NDataTable,
-  NInput,
   NButton,
   NSpace,
   NGrid,
@@ -59,15 +39,18 @@ import {
   NForm,
   NFormItem,
   NFormItemGridItem,
+  NInput,
+  NInputNumber,
+  NDatePicker,
 } from "naive-ui";
 
-console.log(NFormItemGridItem.name);
-import { h, ref, reactive, computed } from "vue";
+import { h, ref, reactive, computed, toRefs } from "vue";
 
 export default {
   components: {
     NDataTable,
     NInput,
+    NInputNumber,
     NButton,
     NSpace,
     NGrid,
@@ -78,11 +61,53 @@ export default {
     NForm,
     NFormItem,
     NFormItemGi: NFormItemGridItem,
+    NDatePicker,
   },
   setup() {
-    let showModal = ref(false);
+    let showModal = ref(true);
     let formRef = ref(null);
     let formData = reactive({});
+    let formItems = reactive({
+      etf: {
+        label: "网格品种",
+        is: "n-input",
+      },
+      code: {
+        label: "网格代码",
+        is: "n-input-number",
+        showButton: false,
+      },
+      grade: {
+        label: "网格挡位",
+        is: "n-input-number",
+        showButton: false,
+      },
+      buyDate: {
+        label: "买入时间",
+        is: "n-date-picker",
+        type: "date",
+      },
+      buyNumber: {
+        label: "买入股数",
+        is: "n-input",
+      },
+      buyPrice: {
+        label: "买入价格",
+        is: "n-input",
+      },
+      sellDate: {
+        label: "卖出时间",
+        is: "n-input",
+      },
+      sellNumber: {
+        label: "卖出股数",
+        is: "n-input",
+      },
+      sellPrice: {
+        label: "卖出价格",
+        is: "n-input",
+      },
+    });
 
     const columns = [
       {
@@ -143,7 +168,7 @@ export default {
       },
       {
         title: "操作",
-        render: (row) => {
+        render: (row, rowIndex) => {
           return h(NSpace, {}, () => {
             return [
               h(
@@ -151,6 +176,7 @@ export default {
                 { size: "tiny", disabled: row.status == 1 },
                 () => "成交"
               ),
+              h(NButton, { size: "tiny" }, () => "新增"),
               h(NButton, { size: "tiny" }, () => "编辑"),
               h(NButton, { size: "tiny" }, () => "删除"),
             ];
@@ -201,23 +227,41 @@ export default {
       showModal.value = true;
     }
 
+    function formSubmit() {
+      originData.push(formData);
+    }
+
+    function getComponentProps(formItem) {
+      const ignoreKeys = ["is", "label"];
+      const props = {};
+      Object.keys(formItem).forEach((key) => {
+        !ignoreKeys.includes(key) && (props[key] = formItem[key]);
+      });
+      return props;
+    }
+
     return {
       formData,
-      formRef,
+      formItems,
       showModal,
       tableData,
       columns,
       toAdd,
+      formSubmit,
+      getComponentProps,
     };
   },
 };
 </script>
 
 
-<style lang="postcss" scoped>
+<style lang="postcss" >
 .page {
   padding: 20px 0px 20px;
   width: 1200px;
   margin: 0 auto;
+}
+.n-input-number {
+  width: 100%;
 }
 </style>
