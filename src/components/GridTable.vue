@@ -1,192 +1,93 @@
 <template>
-  <div class="page">
-    <n-grid :y-gap="10">
-      <n-grid-item :span="24">
-        <n-space justify="end">
-          <n-button type="primary" @click="toAdd">添加</n-button>
-        </n-space>
-      </n-grid-item>
-      <n-grid-item :span="24">
-        <n-data-table :single-line="false" :columns="columns" :data="tableData" />
-      </n-grid-item>
-    </n-grid>
-
-    <!-- 表单 -->
-    <n-modal v-model:show="showModal" preset="dialog" title="新增条件单" :show-icon="false" positive-text="提交" style="width:1000px"
-      :on-positive-click="formSubmit">
-      <n-form :model="formData" ref="formRef" label-placement="left" label-width="70px" style="margin-top:20px">
-        <n-grid :cols="24" :x-gap="24" style="width:100%">
-          <n-form-item-gi v-for="(item,key) in formItems" :key="key" :label="item.label" :path="key" :span="8">
-            <component :is="item.is" v-model:value="formData[key]" v-bind="getComponentProps(item)"></component>
-          </n-form-item-gi>
-        </n-grid>
-      </n-form>
-    </n-modal>
-
+  <div class="search-panel">
+    <a-space>
+      <a-button type="primary">新增</a-button>
+    </a-space>
   </div>
+  <a-table :columns="columns" :data-source="data" bordered size="middle">
+    <template #status="{ record }">
+      <a-tag v-if="record.status==1" color="success">已成交</a-tag>
+      <a-tag v-else color="processing">挂单中</a-tag>
+    </template>
+    <template #menu="{record}">
+      <a-space>
+        <a-button type="primary" size="small" :disabled="record.status==1">成交</a-button>
+        <a-button type="primary" size="small">新增</a-button>
+        <a-button type="primary" size="small">编辑</a-button>
+        <a-button type="primary" size="small">删除</a-button>
+      </a-space>
+    </template>
+  </a-table>
 </template>
-
-<script>
-import {
-  NDataTable,
-  NButton,
-  NSpace,
-  NGrid,
-  NGridItem,
-  NTag,
-  NModal,
-  NDialog,
-  NForm,
-  NFormItem,
-  NFormItemGridItem,
-  NInput,
-  NInputNumber,
-  NDatePicker,
-} from "naive-ui";
-
-import { h, ref, reactive, computed, toRefs } from "vue";
+ 
+<script >
+import { ref, reactive, computed } from "vue";
 
 export default {
-  components: {
-    NDataTable,
-    NInput,
-    NInputNumber,
-    NButton,
-    NSpace,
-    NGrid,
-    NGridItem,
-    NTag,
-    NModal,
-    NDialog,
-    NForm,
-    NFormItem,
-    NFormItemGi: NFormItemGridItem,
-    NDatePicker,
-  },
+  name: "GridTable",
   setup() {
-    let showModal = ref(true);
-    let formRef = ref(null);
-    let formData = reactive({});
-    let formItems = reactive({
-      etf: {
-        label: "网格品种",
-        is: "n-input",
-      },
-      code: {
-        label: "网格代码",
-        is: "n-input-number",
-        showButton: false,
-      },
-      grade: {
-        label: "网格挡位",
-        is: "n-input-number",
-        showButton: false,
-      },
-      buyDate: {
-        label: "买入时间",
-        is: "n-date-picker",
-        type: "date",
-      },
-      buyNumber: {
-        label: "买入股数",
-        is: "n-input",
-      },
-      buyPrice: {
-        label: "买入价格",
-        is: "n-input",
-      },
-      sellDate: {
-        label: "卖出时间",
-        is: "n-input",
-      },
-      sellNumber: {
-        label: "卖出股数",
-        is: "n-input",
-      },
-      sellPrice: {
-        label: "卖出价格",
-        is: "n-input",
-      },
-    });
-
     const columns = [
       {
         title: "网格种类",
-        key: "etf",
-        // rowSpan: (rowData, rowIndex) => (rowIndex === 0 ? 2 : 1),
+        dataIndex: "etf",
       },
       {
         title: "挡位",
-        key: "grade",
-        render: (row) => {
-          return row.grade;
+        dataIndex: "grade",
+        customRender: ({ record }) => {
+          return record.grade;
         },
       },
       {
         title: "买入/卖出日期",
-        render: (row) => {
+        customRender: ({ record }) => {
           return (
-            row.buyDate + " / " + (row.sellDate == "" ? "无" : row.sellDate)
+            record.buyDate +
+            " / " +
+            (record.sellDate == "" ? "无" : record.sellDate)
           );
         },
       },
       {
         title: "买入/卖出价格",
-        render: (row) => {
-          return row.buyPrice + " / " + row.sellPrice;
+        customRender: ({ record }) => {
+          return record.buyPrice + " / " + record.sellPrice;
         },
       },
       {
         title: "买入/卖出股数",
-        key: "buyNumber",
-        render: (row) => {
-          return row.buyNumber + " / " + row.sellNumber;
+        dataIndex: "buyNumber",
+        customRender: ({ record }) => {
+          return record.buyNumber + " / " + record.sellNumber;
         },
       },
       {
         title: "买入/卖出金额",
-        key: "buyTotalPrice",
-        render: (row) => {
-          return row.buyTotalPrice + " / " + row.sellTotalPrice;
+        dataIndex: "buyTotalPrice",
+        customRender: ({ record }) => {
+          return record.buyTotalPrice + " / " + record.sellTotalPrice;
         },
       },
       {
         title: "利润",
-        key: "profit",
-        render: (row) => {
-          return row.profit + " / " + row.profitRate;
+        dataIndex: "profit",
+        customRender: ({ record }) => {
+          return record.profit + " / " + record.profitRate;
         },
       },
       {
         title: "状态",
-        key: "status",
-        render: (row) => {
-          return row.status == 1
-            ? h(NTag, { type: "success", size: "small" }, () => "已成交")
-            : h(NTag, { type: "info", size: "small" }, () => "挂单中");
-        },
+        dataIndex: "status",
+        slots: { customRender: "status" },
       },
       {
         title: "操作",
-        render: (row, rowIndex) => {
-          return h(NSpace, {}, () => {
-            return [
-              h(
-                NButton,
-                { size: "tiny", disabled: row.status == 1 },
-                () => "成交"
-              ),
-              h(NButton, { size: "tiny" }, () => "新增"),
-              h(NButton, { size: "tiny" }, () => "编辑"),
-              h(NButton, { size: "tiny" }, () => "删除"),
-            ];
-          });
-        },
+        slots: { customRender: "menu" },
       },
     ];
-
     const originData = reactive([
       {
+        key: "1",
         etf: "证券ETF / 512880",
         grade: "1.00",
         buyDate: "2021-05-25",
@@ -198,6 +99,7 @@ export default {
         status: 1,
       },
       {
+        key: "2",
         etf: "证券ETF / 512880",
         grade: "1.00",
         buyDate: "2021-05-25",
@@ -209,7 +111,7 @@ export default {
       },
     ]);
 
-    const tableData = computed(() => {
+    const data = computed(() => {
       return originData.map((v) => {
         let row = Object.assign({}, v);
         row.buyTotalPrice = (row.buyNumber * row.buyPrice).toFixed(2);
@@ -223,45 +125,18 @@ export default {
       });
     });
 
-    function toAdd() {
-      showModal.value = true;
-    }
-
-    function formSubmit() {
-      originData.push(formData);
-    }
-
-    function getComponentProps(formItem) {
-      const ignoreKeys = ["is", "label"];
-      const props = {};
-      Object.keys(formItem).forEach((key) => {
-        !ignoreKeys.includes(key) && (props[key] = formItem[key]);
-      });
-      return props;
-    }
-
     return {
-      formData,
-      formItems,
-      showModal,
-      tableData,
       columns,
-      toAdd,
-      formSubmit,
-      getComponentProps,
+      data,
     };
   },
 };
 </script>
-
-
-<style lang="postcss" >
-.page {
-  padding: 20px 0px 20px;
-  width: 1200px;
-  margin: 0 auto;
-}
-.n-input-number {
-  width: 100%;
+ 
+<style lang="postcss" scoped>
+.search-panel {
+  display: flex;
+  margin-bottom: 10px;
+  justify-content: flex-end;
 }
 </style>
